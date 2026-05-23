@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
 model User {
   id           String   @id @default(cuid())
   username     String
@@ -17,4 +23,19 @@ model User {
 
   @@index([email])
   @@map("users")
+}
+
+model Topic {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique
+  description String
+  difficulty  Difficulty
+  orderIndex  Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([slug])
+  @@index([orderIndex])
+  @@map("topics")
 }
