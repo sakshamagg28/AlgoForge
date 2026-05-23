@@ -13,11 +13,21 @@ enum Difficulty {
   HARD
 }
 
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+}
+
 model User {
   id           String   @id @default(cuid())
   username     String
   email        String   @unique
   passwordHash String
+  submissions  Submission[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -54,6 +64,7 @@ model Problem {
   starterCode Json
   topicId     String
   topic       Topic      @relation(fields: [topicId], references: [id], onDelete: Restrict)
+  submissions Submission[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -62,4 +73,26 @@ model Problem {
   @@index([difficulty])
   @@index([createdAt])
   @@map("problems")
+}
+
+model Submission {
+  id              String           @id @default(cuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId       String
+  problem         Problem          @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  code            String
+  language        String
+  status          SubmissionStatus
+  executionTimeMs Int?
+  memoryKb        Int?
+  testCasesPassed Int?
+  totalTestCases  Int?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([problemId])
+  @@index([createdAt])
+  @@map("submissions")
 }
