@@ -1,15 +1,25 @@
 import { Router } from "express";
 
+import { requireAuth } from "../../middleware/auth.middleware.js";
+import { validate } from "../../middleware/validate.middleware.js";
 import {
-  bookmarkProblem,
+  createProblem,
+  deleteProblem,
   getProblemBySlug,
   getProblems,
-  updateProblemProgress
+  updateProblem
 } from "./problems.controller.js";
+import {
+  createProblemSchema,
+  getProblemBySlugSchema,
+  problemIdSchema,
+  updateProblemSchema
+} from "./problems.validation.js";
 
 export const problemsRoutes = Router();
 
 problemsRoutes.get("/", getProblems);
-problemsRoutes.get("/:slug", getProblemBySlug);
-problemsRoutes.patch("/:id/progress", updateProblemProgress);
-problemsRoutes.patch("/:id/bookmark", bookmarkProblem);
+problemsRoutes.post("/", requireAuth, validate(createProblemSchema), createProblem);
+problemsRoutes.get("/:slug", validate(getProblemBySlugSchema), getProblemBySlug);
+problemsRoutes.patch("/:id", requireAuth, validate(updateProblemSchema), updateProblem);
+problemsRoutes.delete("/:id", requireAuth, validate(problemIdSchema), deleteProblem);

@@ -32,10 +32,34 @@ model Topic {
   description String
   difficulty  Difficulty
   orderIndex  Int
+  problems    Problem[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
   @@index([slug])
   @@index([orderIndex])
   @@map("topics")
+}
+
+model Problem {
+  id          String     @id @default(cuid())
+  title       String     @unique
+  slug        String     @unique
+  statement   String
+  difficulty  Difficulty
+  constraints String
+  examples    Json
+  hints       Json
+  editorial   String?
+  starterCode Json
+  topicId     String
+  topic       Topic      @relation(fields: [topicId], references: [id], onDelete: Restrict)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([slug])
+  @@index([topicId])
+  @@index([difficulty])
+  @@index([createdAt])
+  @@map("problems")
 }

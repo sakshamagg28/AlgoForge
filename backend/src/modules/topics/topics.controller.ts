@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { problemsService } from "../problems/problems.service.js";
 import { topicsService } from "./topics.service.js";
 import {
   createTopicSchema,
@@ -23,6 +24,17 @@ export const getTopicBySlug: RequestHandler = async (req, res, next) => {
     const topic = await topicsService.getTopicBySlug(params.slug);
 
     res.status(200).json({ topic });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProblemsByTopicSlug: RequestHandler = async (req, res, next) => {
+  try {
+    const { params } = getTopicBySlugSchema.parse({ params: req.params });
+    const result = await problemsService.getProblemsByTopicSlug(params.slug);
+
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

@@ -5,6 +5,7 @@ import { validate } from "../../middleware/validate.middleware.js";
 import {
   createTopic,
   deleteTopic,
+  getProblemsByTopicSlug,
   getTopicBySlug,
   getTopics,
   updateTopic
@@ -19,6 +20,7 @@ import {
 export const topicsRoutes = Router();
 
 topicsRoutes.get("/", getTopics);
+topicsRoutes.get("/:slug/problems", validate(getTopicBySlugSchema), getProblemsByTopicSlug);
 topicsRoutes.get("/:slug", validate(getTopicBySlugSchema), getTopicBySlug);
 topicsRoutes.post("/", requireAuth, validate(createTopicSchema), createTopic);
 topicsRoutes.patch("/:id", requireAuth, validate(updateTopicSchema), updateTopic);
