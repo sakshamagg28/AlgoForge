@@ -1,7 +1,11 @@
-export function hashPassword() {
-  throw new Error("Password utility is not implemented yet.");
+import bcrypt from "bcrypt";
+
+const SALT_ROUNDS = 12;
+
+export function hashPassword(password: string) {
+  return bcrypt.hash(password, SALT_ROUNDS);
 }
 
-export function comparePassword() {
-  throw new Error("Password utility is not implemented yet.");
+export function comparePassword(password: string, passwordHash: string) {
+  return bcrypt.compare(password, passwordHash);
 }
