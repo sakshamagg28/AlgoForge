@@ -65,6 +65,7 @@ model Problem {
   topicId     String
   topic       Topic      @relation(fields: [topicId], references: [id], onDelete: Restrict)
   submissions Submission[]
+  testCases   TestCase[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -73,6 +74,22 @@ model Problem {
   @@index([difficulty])
   @@index([createdAt])
   @@map("problems")
+}
+
+model TestCase {
+  id             String   @id @default(cuid())
+  problemId      String
+  problem        Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  input          String
+  expectedOutput String
+  isHidden       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([problemId])
+  @@index([isHidden])
+  @@index([createdAt])
+  @@map("test_cases")
 }
 
 model Submission {

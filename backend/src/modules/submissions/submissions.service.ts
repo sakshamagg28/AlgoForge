@@ -1,7 +1,9 @@
-import { SubmissionStatus, type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { prisma } from "../../config/db.js";
 import { ApiError } from "../../utils/apiError.js";
+import { judgeService } from "../judge/judge.service.js";
+import type { JudgeLanguage } from "../judge/types.js";
 import type { CreateSubmissionInput } from "./submissions.validation.js";
 
 const submissionInclude = {
@@ -22,20 +24,6 @@ const submissionInclude = {
   }
 } satisfies Prisma.SubmissionInclude;
 
-function randomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function runMockJudge() {
-  return {
-    status: SubmissionStatus.ACCEPTED,
-    executionTimeMs: randomInt(24, 240),
-    memoryKb: randomInt(12000, 96000),
-    testCasesPassed: 10,
-    totalTestCases: 10
-  };
-}
-
 export const submissionsService = {
   async createSubmission(userId: string, input: CreateSubmissionInput) {
     const problem = await prisma.problem.findUnique({
@@ -47,7 +35,11 @@ export const submissionsService = {
       throw new ApiError(404, "Problem not found");
     }
 
-    const judgeResult = runMockJudge();
+    const judgeResult = await judgeService.judgeProblemSubmission(
+      input.problemId,
+      input.code,
+      input.language as JudgeLanguage
+    );
 
     return prisma.submission.create({
       data: {

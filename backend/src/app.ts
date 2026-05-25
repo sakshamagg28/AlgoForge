@@ -14,6 +14,7 @@ import { problemsRoutes } from "./modules/problems/problems.routes.js";
 import { revisionsRoutes } from "./modules/revisions/revisions.routes.js";
 import { snippetsRoutes } from "./modules/snippets/snippets.routes.js";
 import { submissionsRoutes } from "./modules/submissions/submissions.routes.js";
+import { testCasesRoutes } from "./modules/testcases/testcases.routes.js";
 import { topicsRoutes } from "./modules/topics/topics.routes.js";
 
 export const app = express();
@@ -38,6 +39,7 @@ app.use("/api/problems", problemsRoutes);
 app.use("/api/notes", notesRoutes);
 app.use("/api/snippets", snippetsRoutes);
 app.use("/api/submissions", submissionsRoutes);
+app.use("/api/testcases", testCasesRoutes);
 app.use("/api/revisions", revisionsRoutes);
 app.use("/api/companies", companiesRoutes);
 app.use("/api/mocks", mocksRoutes);
