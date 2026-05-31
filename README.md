@@ -236,13 +236,26 @@ docker pull --platform linux/arm64 node:22-slim
 
 ## Screenshots
 
-Add screenshots here before publishing the portfolio repository:
+### Authentication
+![Authentication](./screenshots/create-account-page.png)
 
-- Dashboard
-- Roadmap
-- Problem workspace
-- Submission history
-- Company prep
+### Dashboard
+![Dashboard](./screenshots/dashboard.png)
+
+### Problem Workspace
+![Problem Workspace](./screenshots/problem-page.png)
+
+### DSA Roadmap
+![Roadmap](./screenshots/roadmap.png)
+
+### Company Preparation
+![Company Prep](./screenshots/companies.png)
+
+### Notes
+![Notes](./screenshots/notes.png)
+
+### Revision Tracker
+![Revision Tracker](./screenshots/revision.png)
 
 ## Verification
 
