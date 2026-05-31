@@ -1,15 +1,22 @@
 import { Router } from "express";
 
+import { requireAuth } from "../../middleware/auth.middleware.js";
+import { validate } from "../../middleware/validate.middleware.js";
 import {
   completeRevision,
-  createProblemRevision,
-  getDueRevisions,
-  rescheduleRevision
+  createRevision,
+  deleteRevision,
+  getRevisions,
+  updateRevision
 } from "./revisions.controller.js";
+import { createRevisionSchema, revisionIdSchema, updateRevisionSchema } from "./revisions.validation.js";
 
 export const revisionsRoutes = Router();
 
-revisionsRoutes.get("/due", getDueRevisions);
-revisionsRoutes.post("/problems/:problemId", createProblemRevision);
-revisionsRoutes.patch("/:id/complete", completeRevision);
-revisionsRoutes.patch("/:id/reschedule", rescheduleRevision);
+revisionsRoutes.use(requireAuth);
+
+revisionsRoutes.get("/", getRevisions);
+revisionsRoutes.post("/", validate(createRevisionSchema), createRevision);
+revisionsRoutes.patch("/:id", validate(updateRevisionSchema), updateRevision);
+revisionsRoutes.patch("/:id/complete", validate(revisionIdSchema), completeRevision);
+revisionsRoutes.delete("/:id", validate(revisionIdSchema), deleteRevision);

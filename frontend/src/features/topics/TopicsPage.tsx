@@ -38,15 +38,15 @@ export function TopicsPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {topics.map((topic) => (
             <Link
-              className="rounded-lg border border-ink/10 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-moss"
+              className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-cyan-400/60"
               key={topic.id}
               to={`/topics/${topic.slug}`}
             >
               <div className="flex items-start justify-between gap-3">
-                <h2 className="text-xl font-bold text-ink">{topic.name}</h2>
+                <h2 className="text-xl font-bold text-white">{topic.name}</h2>
                 <Badge className={difficultyClass(topic.difficulty)}>{difficultyLabel(topic.difficulty)}</Badge>
               </div>
-              <p className="mt-3 text-sm leading-6 text-ink/65">{topic.description}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-400">{topic.description}</p>
             </Link>
           ))}
         </div>

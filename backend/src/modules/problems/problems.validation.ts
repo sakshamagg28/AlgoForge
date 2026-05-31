@@ -17,6 +17,10 @@ const starterCodeSchema = z
     message: "At least one starter code language is required"
   });
 
+const companyTagsSchema = z
+  .array(z.string().trim().min(1, "Company tag cannot be empty").max(40, "Company tag is too long"))
+  .default([]);
+
 export const getProblemBySlugSchema = z.object({
   params: z.object({
     slug: z.string().trim().min(1, "Problem slug is required")
@@ -51,6 +55,7 @@ export const createProblemSchema = z.object({
     hints: z.array(z.string().trim().min(1, "Hint cannot be empty")).default([]),
     editorial: z.string().trim().max(10000, "Editorial must be at most 10000 characters").optional(),
     starterCode: starterCodeSchema,
+    companyTags: companyTagsSchema,
     topicId: z.string().cuid("Invalid topic id")
   })
 });
@@ -84,6 +89,7 @@ export const updateProblemSchema = z.object({
       hints: z.array(z.string().trim().min(1, "Hint cannot be empty")).optional(),
       editorial: z.string().trim().max(10000, "Editorial must be at most 10000 characters").nullable().optional(),
       starterCode: starterCodeSchema.optional(),
+      companyTags: companyTagsSchema.optional(),
       topicId: z.string().cuid("Invalid topic id").optional()
     })
     .refine((body) => Object.keys(body).length > 0, {

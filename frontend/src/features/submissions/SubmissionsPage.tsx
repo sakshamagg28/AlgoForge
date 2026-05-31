@@ -38,20 +38,20 @@ export function SubmissionsPage() {
         <div className="space-y-3">
           {submissions.map((submission) => (
             <Link
-              className="grid gap-3 rounded-lg border border-ink/10 bg-white p-5 shadow-soft transition hover:border-moss md:grid-cols-[1fr_auto]"
+              className="grid gap-3 rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-soft transition hover:border-cyan-400/60 md:grid-cols-[1fr_auto]"
               key={submission.id}
               to={`/problems/${submission.problem.slug}`}
             >
               <div>
-                <h2 className="text-lg font-bold text-ink">{submission.problem.title}</h2>
-                <p className="mt-1 text-sm text-ink/60">
+                <h2 className="text-lg font-bold text-white">{submission.problem.title}</h2>
+                <p className="mt-1 text-sm text-slate-500">
                   {submission.language.toUpperCase()} · {formatDateTime(submission.createdAt)}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3 md:justify-end">
                 <Badge className={statusClass(submission.status)}>{submission.status.replaceAll("_", " ")}</Badge>
-                <span className="text-sm text-ink/65">{submission.executionTimeMs} ms</span>
-                <span className="text-sm text-ink/65">{submission.memoryKb} KB</span>
+                <span className="text-sm text-slate-500">{submission.executionTimeMs ?? 0} ms</span>
+                <span className="text-sm text-slate-500">{submission.memoryKb ?? 0} KB</span>
               </div>
             </Link>
           ))}

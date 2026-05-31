@@ -1,8 +1,19 @@
 import type { RequestHandler } from "express";
 
 import type { AuthenticatedRequest } from "../../middleware/auth.middleware.js";
-import { createSubmissionSchema, submissionIdSchema } from "./submissions.validation.js";
+import { createSubmissionSchema, runCodeSchema, submissionIdSchema } from "./submissions.validation.js";
 import { submissionsService } from "./submissions.service.js";
+
+export const runCode: RequestHandler = async (req, res, next) => {
+  try {
+    const { body } = runCodeSchema.parse({ body: req.body });
+    const result = await submissionsService.runCode(body);
+
+    res.status(200).json({ result });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const createSubmission: RequestHandler = async (req, res, next) => {
   try {

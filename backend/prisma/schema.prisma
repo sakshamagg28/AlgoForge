@@ -13,6 +13,11 @@ enum Difficulty {
   HARD
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 enum SubmissionStatus {
   PENDING
   ACCEPTED
@@ -20,18 +25,29 @@ enum SubmissionStatus {
   TIME_LIMIT_EXCEEDED
   RUNTIME_ERROR
   COMPILATION_ERROR
+  INTERNAL_ERROR
+}
+
+enum RevisionStatus {
+  PENDING
+  COMPLETED
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           String            @id @default(cuid())
   username     String
-  email        String   @unique
+  email        String            @unique
   passwordHash String
+  role         UserRole          @default(USER)
   submissions  Submission[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  notes        Note[]
+  revisions    Revision[]
+  progress     ProblemProgress[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
   @@index([email])
+  @@index([role])
   @@map("users")
 }
 
@@ -43,6 +59,7 @@ model Topic {
   difficulty  Difficulty
   orderIndex  Int
   problems    Problem[]
+  notes       Note[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -52,9 +69,9 @@ model Topic {
 }
 
 model Problem {
-  id          String     @id @default(cuid())
-  title       String     @unique
-  slug        String     @unique
+  id          String            @id @default(cuid())
+  title       String            @unique
+  slug        String            @unique
   statement   String
   difficulty  Difficulty
   constraints String
@@ -62,17 +79,22 @@ model Problem {
   hints       Json
   editorial   String?
   starterCode Json
+  companyTags String[]          @default([])
   topicId     String
-  topic       Topic      @relation(fields: [topicId], references: [id], onDelete: Restrict)
+  topic       Topic             @relation(fields: [topicId], references: [id], onDelete: Restrict)
   submissions Submission[]
   testCases   TestCase[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  notes       Note[]
+  revisions   Revision[]
+  progress    ProblemProgress[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   @@index([slug])
   @@index([topicId])
   @@index([difficulty])
   @@index([createdAt])
+  @@index([companyTags], type: Gin)
   @@map("problems")
 }
 
@@ -105,6 +127,9 @@ model Submission {
   memoryKb        Int?
   testCasesPassed Int?
   totalTestCases  Int?
+  compileError    String?
+  runtimeError    String?
+  judgeOutput     Json?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
@@ -112,4 +137,67 @@ model Submission {
   @@index([problemId])
   @@index([createdAt])
   @@map("submissions")
+}
+
+model ProblemProgress {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId  String
+  problem    Problem   @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  attempted  Boolean   @default(false)
+  solved     Boolean   @default(false)
+  bookmarked Boolean   @default(false)
+  solvedAt   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([userId, problemId])
+  @@index([userId])
+  @@index([problemId])
+  @@index([solved])
+  @@map("problem_progress")
+}
+
+model Note {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  content    String
+  bookmarked Boolean  @default(false)
+  important  Boolean  @default(false)
+  topicId    String?
+  topic      Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  problemId  String?
+  problem    Problem? @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([topicId])
+  @@index([problemId])
+  @@index([bookmarked])
+  @@index([important])
+  @@map("notes")
+}
+
+model Revision {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId String
+  problem   Problem        @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  dueDate   DateTime
+  status    RevisionStatus @default(PENDING)
+  revisedAt DateTime?
+  note      String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([problemId])
+  @@index([dueDate])
+  @@index([status])
+  @@map("revisions")
 }

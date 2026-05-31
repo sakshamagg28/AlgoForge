@@ -55,13 +55,13 @@ export function TopicProblemsPage() {
         <div className="space-y-3">
           {problems.map((problem) => (
             <Link
-              className="flex flex-col gap-3 rounded-lg border border-ink/10 bg-white p-5 shadow-soft transition hover:border-moss sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-soft transition hover:border-cyan-400/60 sm:flex-row sm:items-center sm:justify-between"
               key={problem.id}
               to={`/problems/${problem.slug}`}
             >
               <div>
-                <h2 className="text-lg font-bold text-ink">{problem.title}</h2>
-                <p className="mt-1 text-sm text-ink/60">{problem.constraints}</p>
+                <h2 className="text-lg font-bold text-white">{problem.title}</h2>
+                <p className="mt-1 text-sm text-slate-500">{problem.constraints}</p>
               </div>
               <Badge className={difficultyClass(problem.difficulty)}>{difficultyLabel(problem.difficulty)}</Badge>
             </Link>

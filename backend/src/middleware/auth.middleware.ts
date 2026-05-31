@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { UserRole } from "@prisma/client";
 
 import { prisma } from "../config/db.js";
 import { ApiError } from "../utils/apiError.js";
@@ -8,6 +9,7 @@ export type AuthenticatedUser = {
   id: string;
   username: string;
   email: string;
+  role: UserRole;
   createdAt: Date;
 };
 
@@ -38,13 +40,20 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
       throw new ApiError(401, "Authentication required");
     }
 
-    const payload = verifyAuthToken(token);
+    let payload: ReturnType<typeof verifyAuthToken>;
+    try {
+      payload = verifyAuthToken(token);
+    } catch {
+      throw new ApiError(401, "Invalid or expired session");
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
       select: {
         id: true,
         username: true,
         email: true,
+        role: true,
         createdAt: true
       }
     });
@@ -55,7 +64,23 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
 
     (req as AuthenticatedRequest).user = user;
     next();
-  } catch {
-    next(new ApiError(401, "Invalid or expired session"));
+  } catch (error) {
+    next(error);
   }
+}
+
+export function requireAdmin(req: Request, _res: Response, next: NextFunction) {
+  const user = (req as Partial<AuthenticatedRequest>).user;
+
+  if (!user) {
+    next(new ApiError(401, "Authentication required"));
+    return;
+  }
+
+  if (user.role !== UserRole.ADMIN) {
+    next(new ApiError(403, "Admin access required"));
+    return;
+  }
+
+  next();
 }

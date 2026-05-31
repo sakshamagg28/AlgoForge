@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { requireAuth } from "../../middleware/auth.middleware.js";
+import { requireAdmin, requireAuth } from "../../middleware/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import { createTestCase, deleteTestCase, getProblemTestCases, updateTestCase } from "./testcases.controller.js";
 import {
@@ -13,6 +13,7 @@ import {
 export const testCasesRoutes = Router();
 
 testCasesRoutes.use(requireAuth);
+testCasesRoutes.use(requireAdmin);
 
 testCasesRoutes.get("/problems/:problemId", validate(getProblemTestCasesSchema), getProblemTestCases);
 testCasesRoutes.post("/", validate(createTestCaseSchema), createTestCase);

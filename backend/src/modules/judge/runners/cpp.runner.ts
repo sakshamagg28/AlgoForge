@@ -1,65 +1,79 @@
-import type { CodeRunner, CompileResult, ExecutionResult, JudgeTestCase } from "../types.js";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 
-function deterministicMetric(seed: string, min: number, max: number) {
-  let hash = 0;
+import { SubmissionStatus } from "@prisma/client";
 
-  for (const char of seed) {
-    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
-  }
-
-  return min + (hash % (max - min + 1));
-}
+import { env } from "../../../config/env.js";
+import type { CodeRunner, CompileResult, ExecutionResult, JudgeTestCase, RunnerArtifact } from "../types.js";
+import {
+  cleanupArtifact,
+  createContainerName,
+  createDockerBaseArgs,
+  isDockerInfrastructureFailure,
+  runDocker,
+  toExecutionResult
+} from "./dockerSandbox.js";
 
 export class CppRunner implements CodeRunner {
   async compile(code: string): Promise<CompileResult> {
-    if (/\bCOMPILE_ERROR\b|\bsyntax_error\b|#include\s*<bad>/i.test(code)) {
+    const workDir = await mkdtemp(path.join(tmpdir(), "algoforge-judge-"));
+    const artifact = { workDir };
+    await writeFile(path.join(workDir, "main.cpp"), code, "utf8");
+
+    const containerName = createContainerName("cpp-compile");
+    const args = [
+      ...createDockerBaseArgs(containerName, workDir, env.DOCKER_CPP_IMAGE),
+      "g++",
+      "-std=c++17",
+      "-O2",
+      "-pipe",
+      "main.cpp",
+      "-o",
+      "main.out"
+    ];
+
+    const result = await runDocker(args, {
+      timeoutMs: env.JUDGE_COMPILE_TIMEOUT_MS,
+      containerName
+    });
+
+    if (result.timedOut || isDockerInfrastructureFailure(result)) {
+      await this.cleanup(artifact);
       return {
         ok: false,
-        error: "Compilation failed in deterministic judge placeholder."
+        error: result.timedOut
+          ? "Compilation timed out."
+          : result.internalError ?? (result.stderr || "Docker failed during compilation."),
+        failureStatus: SubmissionStatus.INTERNAL_ERROR
       };
     }
 
-    return { ok: true };
+    if (result.exitCode !== 0) {
+      await this.cleanup(artifact);
+      return {
+        ok: false,
+        error: result.stderr || "Compilation failed.",
+        failureStatus: SubmissionStatus.COMPILATION_ERROR
+      };
+    }
+
+    return { ok: true, artifact };
   }
 
-  async execute(code: string, testCase: JudgeTestCase): Promise<ExecutionResult> {
-    const metricSeed = `${code.length}:${testCase.input.length}:${testCase.expectedOutput.length}`;
+  async execute(artifact: RunnerArtifact, testCase: JudgeTestCase): Promise<ExecutionResult> {
+    const containerName = createContainerName("cpp-run");
+    const args = [...createDockerBaseArgs(containerName, artifact.workDir, env.DOCKER_CPP_IMAGE, true), "./main.out"];
+    const result = await runDocker(args, {
+      input: testCase.input,
+      timeoutMs: env.JUDGE_RUN_TIMEOUT_MS,
+      containerName
+    });
 
-    if (/while\s*\(\s*true\s*\)|for\s*\(\s*;\s*;\s*\)|\bTIME_LIMIT_EXCEEDED\b/i.test(code)) {
-      return {
-        ok: false,
-        stdout: "",
-        stderr: "Execution timed out in deterministic judge placeholder.",
-        executionTimeMs: 1000,
-        memoryKb: deterministicMetric(metricSeed, 16000, 96000),
-        timedOut: true
-      };
-    }
+    return toExecutionResult(result);
+  }
 
-    if (/\bRUNTIME_ERROR\b|\bsegfault\b|throw\s+runtime_error/i.test(code)) {
-      return {
-        ok: false,
-        stdout: "",
-        stderr: "Runtime error in deterministic judge placeholder.",
-        executionTimeMs: deterministicMetric(metricSeed, 20, 180),
-        memoryKb: deterministicMetric(metricSeed, 16000, 96000)
-      };
-    }
-
-    if (/\bWRONG_ANSWER\b|cout\s*<<\s*0\s*;|print\s*\(\s*0\s*\)/i.test(code)) {
-      return {
-        ok: true,
-        stdout: "__wrong_output__",
-        executionTimeMs: deterministicMetric(metricSeed, 20, 220),
-        memoryKb: deterministicMetric(metricSeed, 16000, 96000)
-      };
-    }
-
-    return {
-      ok: true,
-      stdout: testCase.expectedOutput,
-      executionTimeMs: deterministicMetric(metricSeed, 20, 220),
-      memoryKb: deterministicMetric(metricSeed, 16000, 96000)
-    };
+  async cleanup(artifact: RunnerArtifact) {
+    await cleanupArtifact(artifact);
   }
 }

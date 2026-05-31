@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { requireAuth } from "../../middleware/auth.middleware.js";
+import { requireAdmin, requireAuth } from "../../middleware/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import {
   createProblem,
@@ -19,7 +19,7 @@ import {
 export const problemsRoutes = Router();
 
 problemsRoutes.get("/", getProblems);
-problemsRoutes.post("/", requireAuth, validate(createProblemSchema), createProblem);
+problemsRoutes.post("/", requireAuth, requireAdmin, validate(createProblemSchema), createProblem);
 problemsRoutes.get("/:slug", validate(getProblemBySlugSchema), getProblemBySlug);
-problemsRoutes.patch("/:id", requireAuth, validate(updateProblemSchema), updateProblem);
-problemsRoutes.delete("/:id", requireAuth, validate(problemIdSchema), deleteProblem);
+problemsRoutes.patch("/:id", requireAuth, requireAdmin, validate(updateProblemSchema), updateProblem);
+problemsRoutes.delete("/:id", requireAuth, requireAdmin, validate(problemIdSchema), deleteProblem);

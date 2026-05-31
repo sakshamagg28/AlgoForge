@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { requireAuth } from "../../middleware/auth.middleware.js";
+import { requireAdmin, requireAuth } from "../../middleware/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import {
   createTopic,
@@ -22,6 +22,6 @@ export const topicsRoutes = Router();
 topicsRoutes.get("/", getTopics);
 topicsRoutes.get("/:slug/problems", validate(getTopicBySlugSchema), getProblemsByTopicSlug);
 topicsRoutes.get("/:slug", validate(getTopicBySlugSchema), getTopicBySlug);
-topicsRoutes.post("/", requireAuth, validate(createTopicSchema), createTopic);
-topicsRoutes.patch("/:id", requireAuth, validate(updateTopicSchema), updateTopic);
-topicsRoutes.delete("/:id", requireAuth, validate(topicIdSchema), deleteTopic);
+topicsRoutes.post("/", requireAuth, requireAdmin, validate(createTopicSchema), createTopic);
+topicsRoutes.patch("/:id", requireAuth, requireAdmin, validate(updateTopicSchema), updateTopic);
+topicsRoutes.delete("/:id", requireAuth, requireAdmin, validate(topicIdSchema), deleteTopic);

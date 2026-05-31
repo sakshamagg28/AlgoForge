@@ -63,8 +63,30 @@ async function ensureTopicExists(topicId: string) {
 }
 
 export const problemsService = {
-  async getProblems() {
+  async getProblems(filters?: { company?: string; topic?: string; difficulty?: Difficulty; search?: string }) {
+    const where: Prisma.ProblemWhereInput = {};
+
+    if (filters?.company) {
+      where.companyTags = { has: filters.company };
+    }
+
+    if (filters?.topic) {
+      where.topic = { slug: filters.topic };
+    }
+
+    if (filters?.difficulty) {
+      where.difficulty = filters.difficulty;
+    }
+
+    if (filters?.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: "insensitive" } },
+        { statement: { contains: filters.search, mode: "insensitive" } }
+      ];
+    }
+
     return prisma.problem.findMany({
+      where,
       include: problemInclude,
       orderBy: [{ topic: { orderIndex: "asc" } }, { difficulty: "asc" }, { title: "asc" }]
     });
@@ -140,6 +162,7 @@ export const problemsService = {
         hints: input.hints,
         editorial: input.editorial,
         starterCode: input.starterCode,
+        companyTags: input.companyTags,
         topicId: input.topicId
       },
       include: problemInclude
@@ -184,6 +207,7 @@ export const problemsService = {
         hints: input.hints,
         editorial: input.editorial,
         starterCode: input.starterCode,
+        companyTags: input.companyTags,
         topicId: input.topicId
       },
       include: problemInclude

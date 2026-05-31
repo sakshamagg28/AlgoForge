@@ -11,7 +11,9 @@ export type JudgeTestCase = {
 
 export type CompileResult = {
   ok: boolean;
+  artifact?: RunnerArtifact;
   error?: string;
+  failureStatus?: SubmissionStatus;
 };
 
 export type ExecutionResult = {
@@ -21,10 +23,12 @@ export type ExecutionResult = {
   executionTimeMs: number;
   memoryKb: number;
   timedOut?: boolean;
+  failureStatus?: SubmissionStatus;
 };
 
 export type TestCaseResult = {
   testCaseId: string;
+  isHidden: boolean;
   passed: boolean;
   expectedOutput: string;
   actualOutput: string;
@@ -49,7 +53,12 @@ export type JudgeRunInput = {
   testCases: JudgeTestCase[];
 };
 
+export type RunnerArtifact = {
+  workDir: string;
+};
+
 export interface CodeRunner {
   compile(code: string): Promise<CompileResult>;
-  execute(code: string, testCase: JudgeTestCase): Promise<ExecutionResult>;
+  execute(artifact: RunnerArtifact, testCase: JudgeTestCase): Promise<ExecutionResult>;
+  cleanup(artifact: RunnerArtifact): Promise<void>;
 }

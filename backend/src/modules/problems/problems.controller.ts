@@ -8,9 +8,17 @@ import {
   updateProblemSchema
 } from "./problems.validation.js";
 
-export const getProblems: RequestHandler = async (_req, res, next) => {
+export const getProblems: RequestHandler = async (req, res, next) => {
   try {
-    const problems = await problemsService.getProblems();
+    const problems = await problemsService.getProblems({
+      company: typeof req.query.company === "string" ? req.query.company : undefined,
+      topic: typeof req.query.topic === "string" ? req.query.topic : undefined,
+      difficulty:
+        req.query.difficulty === "EASY" || req.query.difficulty === "MEDIUM" || req.query.difficulty === "HARD"
+          ? req.query.difficulty
+          : undefined,
+      search: typeof req.query.search === "string" ? req.query.search : undefined
+    });
     res.status(200).json({ problems });
   } catch (error) {
     next(error);

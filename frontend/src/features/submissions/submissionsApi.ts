@@ -12,6 +12,19 @@ export async function createSubmission(payload: CreateSubmissionPayload) {
   return response.data.submission;
 }
 
+export async function runCode(payload: { code: string; language: SubmissionLanguage; input: string }) {
+  const response = await apiClient.post<{
+    result: {
+      status: Submission["status"];
+      stdout: string;
+      stderr: string;
+      executionTimeMs: number | null;
+      memoryKb: number | null;
+    };
+  }>("/submissions/run", payload);
+  return response.data.result;
+}
+
 export async function getSubmissions() {
   const response = await apiClient.get<{ submissions: Submission[] }>("/submissions");
   return response.data.submissions;

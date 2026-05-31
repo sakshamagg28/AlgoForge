@@ -9,6 +9,7 @@ const publicUserSelect = {
   id: true,
   username: true,
   email: true,
+  role: true,
   createdAt: true
 } satisfies Prisma.UserSelect;
 
@@ -53,6 +54,7 @@ export const authService = {
       id: user.id,
       username: user.username,
       email: user.email,
+      role: user.role,
       createdAt: user.createdAt
     };
   }

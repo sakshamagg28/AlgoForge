@@ -1,0 +1,20 @@
+export const roadmapTopicNames = [
+  "Arrays",
+  "Strings",
+  "Hashing",
+  "Two Pointers",
+  "Sliding Window",
+  "Linked List",
+  "Stack",
+  "Queue",
+  "Binary Search",
+  "Trees",
+  "BST",
+  "Heap",
+  "Greedy",
+  "Backtracking",
+  "Graphs",
+  "Dynamic Programming",
+  "Tries",
+  "Segment Trees"
+];
