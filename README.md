@@ -236,9 +236,6 @@ docker pull --platform linux/arm64 node:22-slim
 
 ## Screenshots
 
-### Authentication
-![Authentication](./screenshots/create-account-page.png)
-
 ### Dashboard
 ![Dashboard](./screenshots/dashboard.png)
 
